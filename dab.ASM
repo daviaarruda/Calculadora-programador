@@ -1,3 +1,9 @@
+; ------------------------------------------------------------------
+; [10/11/2025 18:07] -> Adição da conversão para base 8
+; [06/11/2025 09:39] -> conversão didática de decimal para binário
+; ------------------------------------------------------------------
+
+
 .data
 msg1: .asciiz "Digite um numero decimal: "
 msg2: .asciiz "\nPasso: "
