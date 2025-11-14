@@ -4,7 +4,7 @@ Este projeto implementa uma **calculadora programador didática** em Assembly MI
 
 - **Base 2 (binário)**
 - **Base 8 (octal)**
-- **Base 16 **
+- **Base 16**
 
 ---
 
