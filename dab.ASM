@@ -4,7 +4,7 @@
 ; [10/11/2025 18:07] -> Adição da conversão para base 8
 ; [11/11/2025 15:23] -> Adição da conversão para base 16 
 ; [13/11/2025 21:25] -> Adição da conversão BCD
-; [17/11/2025 20:10] -> Adição da conversão p/ binário 16 bits complemento de 2
+; [17/11/2025 19:07] -> Adição da conversão p/ binário 16 bits complemento de 2
 ; ------------------------------------------------------------------
 
 .data
