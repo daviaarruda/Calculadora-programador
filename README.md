@@ -6,6 +6,7 @@ Este projeto implementa uma **calculadora programador didática** em Assembly MI
 - **Base 8 (octal)**
 - **Base 16**
 - **Código BCD**
+- **Binário de 16 bits com sinal (Complemento de 2)**
 
 ---
 
