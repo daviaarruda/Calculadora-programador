@@ -3,7 +3,8 @@
 ; [06/11/2025 09:39] -> conversão didática de decimal para binário
 ; [10/11/2025 18:07] -> Adição da conversão para base 8
 ; [11/11/2025 15:23] -> Adição da conversão para base 16 
-; [13/11/2025 21:25] -> Adição da conversão BCD 
+; [13/11/2025 21:25] -> Adição da conversão BCD
+; [17/11/2025 20:10] -> Adição da conversão p/ binário 16 bits complemento de 2
 ; ------------------------------------------------------------------
 
 .data
@@ -28,26 +29,29 @@ msg20: .asciiz "\nResultado (base 16): "
 msg_bcd: .asciiz "\n\n--- Conversao para BCD ---\n"
 msg_bcd_result: .asciiz "\nResultado (BCD): "
 
+msg_16bits: .asciiz "\n\n--- Conversao para 16 bits (complemento de 2) ---\nResultado (16 bits): "
+
 novaLinha: .asciiz "\n"
 
 vetor: .space 64
 vetor8: .space 64
 vetor16: .space 64
 vetor_bcd: .space 128
+vetor16bits: .space 32
 
 hex_table: .asciiz "0123456789ABCDEF"
 
 bcd_table:
-    .asciiz "0000"   # 0
-    .asciiz "0001"   # 1
-    .asciiz "0010"   # 2
-    .asciiz "0011"   # 3
-    .asciiz "0100"   # 4
-    .asciiz "0101"   # 5
-    .asciiz "0110"   # 6
-    .asciiz "0111"   # 7
-    .asciiz "1000"   # 8
-    .asciiz "1001"   # 9
+    .asciiz "0000"
+    .asciiz "0001"
+    .asciiz "0010"
+    .asciiz "0011"
+    .asciiz "0100"
+    .asciiz "0101"
+    .asciiz "0110"
+    .asciiz "0111"
+    .asciiz "1000"
+    .asciiz "1001"
 
 .text
 main:
@@ -293,7 +297,7 @@ imprime_bcd:
     addi $t2, $t2, -5
 
 loop_bcd_print:
-    blt $t1, $zero, fim
+    blt $t1, $zero, bits16
 
     lb $a0, 0($t2)
     li $v0, 4
@@ -314,6 +318,54 @@ loop_bcd_print:
     addi $t2, $t2, -5
     addi $t1, $t1, -1
     j loop_bcd_print
+
+bits16:
+    li $v0, 4
+    la $a0, msg_16bits
+    syscall
+
+    li $v0, 4
+    la $a0, msg1
+    syscall
+
+    li $v0, 5
+    syscall
+    move $t0, $v0
+
+    bltz $t0, neg16
+    j pos16
+
+neg16:
+    li $t1, 65536
+    add $t0, $t0, $t1
+
+pos16:
+    li $t1, 16
+    la $t2, vetor16bits
+
+loop16bits:
+    beq $t1, $zero, mostra16bits
+    li $t3, 2
+    div $t0, $t3
+    mfhi $t4
+    mflo $t0
+    addi $t4, $t4, 48
+    sb $t4, 0($t2)
+    addi $t2, $t2, 1
+    addi $t1, $t1, -1
+    j loop16bits
+
+mostra16bits:
+    addi $t2, $t2, -1
+
+loop_print16:
+    blt $t1, $zero, fim
+    lb $a0, 0($t2)
+    li $v0, 11
+    syscall
+    addi $t2, $t2, -1
+    addi $t1, $t1, -1
+    j loop_print16
 
 fim:
     li $v0, 10
