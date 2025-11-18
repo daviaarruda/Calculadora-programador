@@ -5,10 +5,11 @@
 # [11/11/2025 15:23] -> Adicao da conversao para base 16 
 # [13/11/2025 21:25] -> Adicao da conversao BCD
 # [17/11/2025 19:07] -> Adicao da conversao p/ binario 16 bits complemento de 2
+# [18/11/2025 11:00] -> Adicao da conversao Real para Float e Double (IEEE 754)
 # ------------------------------------------------------------------
 
 .data
-msg1:   .asciiz "Digite um numero decimal: "
+msg1:   .asciiz "Digite um numero decimal (Inteiro): "
 msg2:   .asciiz "\nPasso: "
 msg3:   .asciiz " / 2 = "
 msg4:   .asciiz " resto "
@@ -30,6 +31,14 @@ msg_bcd:        .asciiz "\n\n--- Conversao para BCD ---\n"
 msg_bcd_result: .asciiz "\nResultado (BCD): "
 
 msg_16bits:     .asciiz "\n\n--- Conversao para 16 bits (complemento de 2) ---\nResultado (16 bits): "
+
+msg_float_in:   .asciiz "\n\n--- Conversao Real para Float (32 bits) ---\nDigite um numero real (ex: 12.5): "
+msg_double_in:  .asciiz "\n\n--- Conversao Real para Double (64 bits) ---\nDigite um numero real (ex: -0.75): "
+
+lbl_sinal:      .asciiz "\nSinal: "
+lbl_exp_vies:   .asciiz "\nExpoente (com vies): "
+lbl_exp_real:   .asciiz "\nExpoente (sem vies): "
+lbl_fracao:     .asciiz "\nFracao (Binario): "
 
 novaLinha: .asciiz "\n"
 
@@ -403,13 +412,137 @@ mostra16bits:
     li $t1, 16
 
 loop_print16:
-    beq $t1, $zero, fim
+    beq $t1, $zero, float_conversion
     lb $a0, 0($t2)
     li $v0, 11
     syscall
     addi $t2, $t2, -1
     addi $t1, $t1, -1
     j loop_print16
+
+float_conversion:
+    li $v0, 4
+    la $a0, msg_float_in
+    syscall
+
+    li $v0, 6
+    syscall
+
+    mfc1 $t0, $f0
+
+    li $v0, 4
+    la $a0, lbl_sinal
+    syscall
+    
+    srl $a0, $t0, 31
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_exp_vies
+    syscall
+
+    sll $t1, $t0, 1
+    srl $t1, $t1, 24
+    
+    move $a0, $t1
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_exp_real
+    syscall
+
+    sub $a0, $t1, 127
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_fracao
+    syscall
+
+    li $t2, 22
+
+loop_frac_float:
+    bltz $t2, double_conversion
+    
+    srlv $t3, $t0, $t2
+    andi $a0, $t3, 1
+    
+    li $v0, 1
+    syscall
+    
+    addi $t2, $t2, -1
+    j loop_frac_float
+
+double_conversion:
+    li $v0, 4
+    la $a0, msg_double_in
+    syscall
+
+    li $v0, 7
+    syscall
+
+    mfc1 $t8, $f1
+    mfc1 $t9, $f0
+
+    li $v0, 4
+    la $a0, lbl_sinal
+    syscall
+
+    srl $a0, $t8, 31
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_exp_vies
+    syscall
+
+    sll $t1, $t8, 1
+    srl $t1, $t1, 21
+    
+    move $a0, $t1
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_exp_real
+    syscall
+
+    sub $a0, $t1, 1023
+    li $v0, 1
+    syscall
+
+    li $v0, 4
+    la $a0, lbl_fracao
+    syscall
+
+    li $t2, 19
+
+loop_frac_double_hi:
+    bltz $t2, loop_frac_double_lo_init
+    
+    srlv $t3, $t8, $t2
+    andi $a0, $t3, 1
+    li $v0, 1
+    syscall
+    
+    addi $t2, $t2, -1
+    j loop_frac_double_hi
+
+loop_frac_double_lo_init:
+    li $t2, 31
+
+loop_frac_double_lo:
+    bltz $t2, fim
+    
+    srlv $t3, $t9, $t2
+    andi $a0, $t3, 1
+    li $v0, 1
+    syscall
+    
+    addi $t2, $t2, -1
+    j loop_frac_double_lo
 
 fim:
     li $v0, 10
